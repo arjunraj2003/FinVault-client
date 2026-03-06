@@ -10,6 +10,8 @@ const navItems = [
   { to: "/transactions", label: "Transactions", icon: ArrowLeftRight },
 ];
 
+
+
 export function DashboardLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -20,6 +22,22 @@ export function DashboardLayout() {
     navigate("/login", { replace: true });
   };
 
+
+  const getFabAction = () => {
+  switch (location.pathname) {
+    case "/accounts":
+      return () => navigate("/accounts/create");
+
+    case "/transactions":
+      return () => navigate("/transactions/create");
+
+    case "/dashboard":
+      return () => navigate("/transactions/create");
+
+    default:
+      return null;
+  }
+};
   // Close profile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,6 +53,8 @@ export function DashboardLayout() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showProfileMenu]);
+
+  const fabAction = getFabAction();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-[#0B1426] dark:to-[#0F1A2F]">

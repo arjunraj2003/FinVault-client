@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeftRight, ChevronLeft, ChevronRight, Trash2, Calendar, Tag, IndianRupee, Filter, ArrowUpDown, Receipt, Loader2 } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronRight, Trash2, Calendar, Tag, IndianRupee, Filter, ArrowUpDown, Receipt, Loader2, Wallet } from "lucide-react";
 import type { TransactionType, TransactionCategory } from "../types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useAccounts } from "@/features/account/hooks/use-accounts";
 
 const categories: TransactionCategory[] = ["salary", "investment", "food", "transport", "entertainment", "utilities", "shopping", "health", "other"];
 
@@ -37,9 +38,11 @@ const formatINR = (value: number) => {
 export default function TransactionsPage() {
   const [typeFilter, setTypeFilter] = useState<TransactionType | "all">("all");
   const [categoryFilter, setCategoryFilter] = useState<TransactionCategory | "all">("all");
+  const [accountFilter, setAccountFilter] = useState<string | "all">("all");
   const [showFilters, setShowFilters] = useState(false);
 
-
+  const { data: accounts, isLoading: accountsLoading } = useAccounts();
+  const accountId = accountFilter || accounts?.[0]?.id || "";
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
 
@@ -58,6 +61,7 @@ export default function TransactionsPage() {
   const params = {
     ...(typeFilter !== "all" && { type: typeFilter }),
     ...(categoryFilter !== "all" && { category: categoryFilter }),
+    ...(accountId !=="all" && { accountId:accountFilter })
   };
 
   const {
@@ -143,6 +147,18 @@ export default function TransactionsPage() {
               ))}
             </SelectContent>
           </Select>
+
+          <Select value={accountFilter || accountId} onValueChange={setAccountFilter}>
+            <SelectTrigger className="h-10 min-w-[160px] flex-1 bg-white dark:bg-[#0F1A2F] border-gray-200 dark:border-gray-800 rounded-xl text-sm shadow-sm hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+              <Wallet className="w-3.5 h-3.5 mr-1.5 text-gray-500 flex-shrink-0" />
+              <SelectValue placeholder={accountsLoading ? "Loading..." : "Select account"} />
+            </SelectTrigger>
+            <SelectContent>
+              {accounts?.map((a) => (
+                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Filters - Mobile Collapsible */}
@@ -172,6 +188,18 @@ export default function TransactionsPage() {
                 ))}
               </SelectContent>
             </Select>
+
+            <Select value={accountFilter || accountId} onValueChange={setAccountFilter}>
+            <SelectTrigger className="h-10 min-w-[160px] flex-1 bg-white dark:bg-[#0F1A2F] border-gray-200 dark:border-gray-800 rounded-xl text-sm shadow-sm hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+              <Wallet className="w-3.5 h-3.5 mr-1.5 text-gray-500 flex-shrink-0" />
+              <SelectValue placeholder={accountsLoading ? "Loading..." : "Select account"} />
+            </SelectTrigger>
+            <SelectContent>
+              {accounts?.map((a) => (
+                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           </div>
         )}
 

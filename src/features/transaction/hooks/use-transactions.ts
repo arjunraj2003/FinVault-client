@@ -41,8 +41,9 @@ export function useCreateTransaction() {
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       toast({ title: "Transaction created" });
     },
-    onError: () => {
-      toast({ title: "Failed to create transaction", variant: "destructive" });
+    onError: (error:any) => {
+      console.log(error)
+      toast({ title:`${error?.response?.data?.message}`, variant: "destructive" });
     },
   });
 }

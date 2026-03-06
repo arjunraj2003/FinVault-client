@@ -61,22 +61,37 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-[#0B1426] dark:to-[#0F1A2F] p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Section - Mobile Optimized */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-              Dashboard
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Your financial overview at a glance
-            </p>
+        {/* UPDATED: Header Section with Horizontal Filters */}
+        <div className="flex flex-col gap-3">
+          {/* Title Area */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                Dashboard
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                Your financial overview
+              </p>
+            </div>
+            
+            {/* Net Balance Pill - Quick Glance */}
+            {!isLoading && summary && (
+              <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+                netBalance >= 0 
+                  ? 'bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400 border border-green-200 dark:border-green-900' 
+                  : 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400 border border-red-200 dark:border-red-900'
+              }`}>
+                {netBalance >= 0 ? 'Net +' : 'Net '}{formatINR(Math.abs(netBalance))}
+              </div>
+            )}
           </div>
 
-          {/* Filters - Stack on mobile, row on desktop */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          {/* UPDATED: Horizontal Filters - Side by Side on Mobile */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+            {/* Account Filter */}
             <Select value={selectedAccount || accountId} onValueChange={setSelectedAccount}>
-              <SelectTrigger className="w-full sm:w-48 bg-white dark:bg-[#0F1A2F] border-gray-200 dark:border-gray-800">
-                <Wallet className="w-4 h-4 mr-2 text-gray-500" />
+              <SelectTrigger className="h-10 min-w-[160px] flex-1 bg-white dark:bg-[#0F1A2F] border-gray-200 dark:border-gray-800 rounded-xl text-sm shadow-sm hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+                <Wallet className="w-3.5 h-3.5 mr-1.5 text-gray-500 flex-shrink-0" />
                 <SelectValue placeholder={accountsLoading ? "Loading..." : "Select account"} />
               </SelectTrigger>
               <SelectContent>
@@ -86,9 +101,10 @@ export default function DashboardPage() {
               </SelectContent>
             </Select>
 
+            {/* Year Filter */}
             <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-              <SelectTrigger className="w-full sm:w-28 bg-white dark:bg-[#0F1A2F] border-gray-200 dark:border-gray-800">
-                <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+              <SelectTrigger className="h-10 min-w-[100px] bg-white dark:bg-[#0F1A2F] border-gray-200 dark:border-gray-800 rounded-xl text-sm shadow-sm hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+                <Calendar className="w-3.5 h-3.5 mr-1.5 text-gray-500 flex-shrink-0" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -100,6 +116,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Rest of your component remains exactly the same */}
         {/* Mobile Quick Stats - Only visible on mobile */}
         {!isLoading && summary && (
           <div className="grid grid-cols-3 gap-2 sm:hidden">
@@ -155,7 +172,7 @@ export default function DashboardPage() {
 
         {/* Charts Section */}
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-          {/* Monthly Bar Chart - Full width on mobile, 2/3 on desktop */}
+          {/* Monthly Bar Chart */}
           <Card className="lg:col-span-2 border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
@@ -251,7 +268,7 @@ export default function DashboardPage() {
                               fill="#666"
                               textAnchor={x > cx ? "start" : "end"}
                               dominantBaseline="central"
-                              fontSize={10}   // 🔥 CHANGE SIZE HERE
+                              fontSize={10}
                             >
                               {`${name} ${(percent * 100 < 1
                                 ? "<1"
@@ -283,7 +300,7 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Current Month Overview - Mobile optimized */}
+        {/* Current Month Overview */}
         {!isLoading && summary?.monthlyData && summary.monthlyData.length > 0 && (
           <Card className="border-gray-200 dark:border-gray-800 shadow-sm">
             <CardHeader className="pb-2">
@@ -322,10 +339,20 @@ export default function DashboardPage() {
           </Card>
         )}
       </div>
+
+      {/* Hide scrollbar style */}
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }
-
 function SummaryCard({
   title,
   value,
