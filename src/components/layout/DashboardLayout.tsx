@@ -1,13 +1,14 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Wallet, ArrowLeftRight, LogOut, User, Menu, Plus } from "lucide-react";
+import { LayoutDashboard, Wallet, ArrowLeftRight, LogOut, User, Menu, Plus, Target, TargetIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/accounts", label: "Accounts", icon: Wallet },
   { to: "/transactions", label: "Transactions", icon: ArrowLeftRight },
+  { to: "/budgets", label: "Budgets", icon: TargetIcon },
 ];
 
 

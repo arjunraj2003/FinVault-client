@@ -39,6 +39,7 @@ export function useCreateTransaction() {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({queryKey:["budgets"]});
       toast({ title: "Transaction created" });
     },
     onError: (error:any) => {

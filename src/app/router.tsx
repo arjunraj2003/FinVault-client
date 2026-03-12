@@ -6,6 +6,7 @@ import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 import AccountsPage from "@/features/account/pages/AccountsPage";
 import TransactionsPage from "@/features/transaction/pages/TransactionsPage";
 import NotFound from "@/pages/NotFound";
+import BudgetsPage from "@/features/budget/pages/BudgetsPage";
 
 export function AppRouter() {
   return (
@@ -18,6 +19,7 @@ export function AppRouter() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/accounts" element={<AccountsPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
+            <Route path="/budgets" element={<BudgetsPage />} />
           </Route>
         </Route>
 
