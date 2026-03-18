@@ -117,8 +117,6 @@ export default function TransactionsPage() {
               className="sm:hidden"
             >
               <Tag className="h-4 w-4 mr-2" />
-
-
             </Button>
           </div>
         </div>

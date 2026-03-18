@@ -1,5 +1,7 @@
+import { Category } from "../category/types";
+
 export interface CreateBudgetDto {
-  category: string;
+  categoryId: string;
   amount: string;
   startDate: string;
   endDate: string;
@@ -7,17 +9,30 @@ export interface CreateBudgetDto {
 
 export interface Budget {
   id: string;
-  category: string;
+  category: Category;
   amount: string;
   startDate: string;
   endDate: string;
   createdAt: string;
 }
 
+export interface UpdateBudgetDto {
+  categoryId?: string;
+  amount?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 export interface BudgetListResponse {
   success: boolean;
   message: string;
   data: Budget[];
+}
+
+export interface SingleBudgetResponse {
+  success: boolean;
+  message: string;
+  data: Budget;
 }
 
 export interface BudgetProgress {

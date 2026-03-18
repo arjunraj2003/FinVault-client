@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Target, Calendar, IndianRupee, Tag, X, ChevronDown, Check } from "lucide-react";
 
 interface BudgetFormData {
-  category: string;
+  categoryId: string;
   amount: string;
   startDate: string;
   endDate: string;
@@ -56,7 +56,7 @@ export function CreateBudgetModal({
   };
 
   const [form, setForm] = useState<BudgetFormData>({
-    category: "",
+    categoryId: "",
     amount: "",
     startDate: "",
     endDate: "",
@@ -65,7 +65,7 @@ export function CreateBudgetModal({
   useEffect(() => {
     if (initialData && isEditing) {
       setForm({
-        category: initialData.category || "",
+        categoryId: initialData.category?.id || "",
         amount: initialData.amount?.toString() || "",
         startDate: initialData.startDate?.split('T')[0] || "",
         endDate: initialData.endDate?.split('T')[0] || "",
@@ -75,7 +75,7 @@ export function CreateBudgetModal({
 
   const resetForm = () => {
     setForm({
-      category: "",
+      categoryId: "",
       amount: "",
       startDate: "",
       endDate: "",
@@ -91,7 +91,7 @@ export function CreateBudgetModal({
 
   const handleSubmit = () => {
     const submitData = {
-      category: form.category,
+      categoryId: form.categoryId,
       amount: form.amount,
       startDate: form.startDate,
       endDate: form.endDate,
@@ -123,7 +123,7 @@ export function CreateBudgetModal({
   const isPending = createBudget.isPending || updateBudget.isPending;
 
   // Get selected category details
-  const selectedCategory = categories.find((c) => c.id === form.category);
+  const selectedCategory = categories.find((c) => c.id === form.categoryId);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -196,13 +196,13 @@ export function CreateBudgetModal({
                       key={category.id}
                       type="button"
                       onClick={() => {
-                        handleChange("category", category.id);
+                        handleChange("categoryId", category.id);
                         setCategoryDropdownOpen(false);
                       }}
                       className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors first:rounded-t-xl last:rounded-b-xl"
                     >
                       <span className="text-sm text-gray-700 dark:text-gray-300">{category.name}</span>
-                      {form.category === category.id && (
+                      {form.categoryId === category.id && (
                         <Check className="w-4 h-4 text-blue-600" />
                       )}
                     </button>
@@ -269,7 +269,7 @@ export function CreateBudgetModal({
         <DialogFooter className="sticky bottom-0 bg-white dark:bg-[#0F1A2F] px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-gray-800">
           <Button
             onClick={handleSubmit}
-            disabled={isPending || !form.category || !form.amount || !form.startDate || !form.endDate}
+            disabled={isPending || !form.categoryId || !form.amount || !form.startDate || !form.endDate}
             className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl text-base font-medium shadow-lg shadow-blue-600/25 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? (

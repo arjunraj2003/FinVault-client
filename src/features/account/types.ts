@@ -7,8 +7,8 @@ export interface Account {
   createdAt: string;
 }
 
-export interface AccountRes{
-  data:Account[];
+export interface AccountRes {
+  data: Account[];
 }
 
 export type AccountType = "checking" | "savings" | "credit" | "investment";
@@ -17,7 +17,7 @@ export interface CreateAccountDto {
   name: string;
   type: AccountType;
   currency: string;
-  balance:string;
+  balance: string;
 }
 
 export interface BalanceResponse {

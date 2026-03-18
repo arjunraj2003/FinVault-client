@@ -149,7 +149,7 @@ export default function BudgetsPage() {
                 <Trash2 className="h-8 w-8 text-red-600 dark:text-red-400" />
               </div>
             </div>
-            
+
             {/* Content */}
             <div className="p-6">
               <AlertDialogHeader className="space-y-3">
@@ -157,13 +157,13 @@ export default function BudgetsPage() {
                   Delete Budget
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-gray-500 dark:text-gray-400 text-center text-sm">
-                  Are you sure you want to delete this budget? 
+                  Are you sure you want to delete this budget?
                   <span className="block mt-2 font-medium text-red-600 dark:text-red-400">
                     This action cannot be undone.
                   </span>
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              
+
               <AlertDialogFooter className="flex flex-col gap-2 mt-6">
                 <AlertDialogCancel className="w-full h-12 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-xl text-base">
                   Cancel
@@ -210,25 +210,25 @@ function BudgetCard({ budget, onDelete, onEdit }: any) {
     <Card className="group relative border-gray-200 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-900 transition-all duration-300 hover:shadow-xl hover:shadow-blue-600/10 hover:-translate-y-1 overflow-hidden">
       {/* Status Indicator Line */}
       <div className={`absolute top-0 left-0 right-0 h-1 ${getProgressColor(progress)}`} />
-      
+
       <CardContent className="p-5 space-y-4">
         {/* Header */}
         <div className="flex justify-between items-start">
           <div className="space-y-1">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
-              {budget.category}
+              {budget.category.name}
             </h3>
             <div className="flex items-center gap-2 text-xs">
               <span className={`px-2 py-0.5 rounded-full border ${getStatusBadge(progress)}`}>
                 {isOverBudget ? 'Overspent' : progress >= 80 ? 'Near Limit' : 'On Track'}
               </span>
               <span className="text-gray-400">
-                {new Date(budget.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - 
+                {new Date(budget.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} -
                 {new Date(budget.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-1">
             <Button
               size="icon"
@@ -288,23 +288,20 @@ function BudgetCard({ budget, onDelete, onEdit }: any) {
               {formatINR(spent)}
             </p>
           </div>
-          <div className={`rounded-lg p-3 ${
-            remaining >= 0 
-              ? 'bg-green-50 dark:bg-green-950/30' 
+          <div className={`rounded-lg p-3 ${remaining >= 0
+              ? 'bg-green-50 dark:bg-green-950/30'
               : 'bg-red-50 dark:bg-red-950/30'
-          }`}>
-            <p className={`text-xs ${
-              remaining >= 0 
-                ? 'text-green-600 dark:text-green-400' 
+            }`}>
+            <p className={`text-xs ${remaining >= 0
+                ? 'text-green-600 dark:text-green-400'
                 : 'text-red-600 dark:text-red-400'
-            } mb-1`}>
+              } mb-1`}>
               Remaining
             </p>
-            <p className={`text-base font-bold ${
-              remaining >= 0 
-                ? 'text-green-700 dark:text-green-300' 
+            <p className={`text-base font-bold ${remaining >= 0
+                ? 'text-green-700 dark:text-green-300'
                 : 'text-red-700 dark:text-red-300'
-            }`}>
+              }`}>
               {remaining >= 0 ? formatINR(remaining) : `-${formatINR(Math.abs(remaining))}`}
             </p>
           </div>

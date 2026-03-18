@@ -82,10 +82,10 @@ interface CreateAccountModalProps {
   trigger?: React.ReactNode;
 }
 
-export function CreateAccountModal({ 
-  open: controlledOpen, 
-  onOpenChange, 
-  trigger 
+export function CreateAccountModal({
+  open: controlledOpen,
+  onOpenChange,
+  trigger
 }: CreateAccountModalProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [step, setStep] = useState(1);
@@ -93,7 +93,7 @@ export function CreateAccountModal({
 
   // Use controlled open if provided, otherwise use internal state
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  
+
   const setIsOpen = (value: boolean) => {
     if (onOpenChange) {
       onOpenChange(value);
@@ -111,9 +111,9 @@ export function CreateAccountModal({
 
   const form = useForm({
     resolver: zodResolver(accountSchema),
-    defaultValues: { 
-      name: "", 
-      type: "checking" as AccountType, 
+    defaultValues: {
+      name: "",
+      type: "checking" as AccountType,
       currency: "INR",
       balance: 0,
     },
@@ -149,7 +149,7 @@ export function CreateAccountModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      
+
       <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-white dark:bg-[#0F1A2F] border-gray-200 dark:border-gray-800">
         {/* Header with close button */}
         <div className="relative px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-800">
@@ -159,14 +159,14 @@ export function CreateAccountModal({
           >
             <X className="w-4 h-4 text-gray-500" />
           </button>
-          
+
           <DialogHeader className="p-0">
             <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
               {step === 1 ? "Create New Account" : "Set Up Your Account"}
             </DialogTitle>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {step === 1 
-                ? "Choose the type of account you want to create" 
+              {step === 1
+                ? "Choose the type of account you want to create"
                 : "Add some details to get started"}
             </p>
           </DialogHeader>
@@ -202,17 +202,16 @@ export function CreateAccountModal({
                           {(Object.entries(accountTypeConfig) as [AccountType, AccountTypeConfig][]).map(([type, config]) => {
                             const Icon = config.icon;
                             const isSelected = field.value === type;
-                            
+
                             return (
                               <button
                                 key={type}
                                 type="button"
                                 onClick={() => field.onChange(type)}
-                                className={`relative p-4 rounded-xl border-2 transition-all duration-200 ${
-                                  isSelected
+                                className={`relative p-4 rounded-xl border-2 transition-all duration-200 ${isSelected
                                     ? `border-${type === 'checking' ? 'blue' : type === 'savings' ? 'green' : type === 'credit' ? 'red' : 'purple'}-600 bg-${type === 'checking' ? 'blue' : type === 'savings' ? 'green' : type === 'credit' ? 'red' : 'purple'}-50 dark:bg-${type === 'checking' ? 'blue' : type === 'savings' ? 'green' : type === 'credit' ? 'red' : 'purple'}-950/20`
                                     : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                                }`}
+                                  }`}
                               >
                                 <div className={`w-10 h-10 rounded-full ${config.lightColor} flex items-center justify-center mb-2`}>
                                   <Icon className={`h-5 w-5 ${config.color}`} />
@@ -243,10 +242,10 @@ export function CreateAccountModal({
                         </FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Input 
-                              placeholder="e.g., Primary Savings" 
+                            <Input
+                              placeholder="e.g., Primary Savings"
                               className="pl-10 h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:border-blue-500 focus:ring-blue-500"
-                              {...field} 
+                              {...field}
                             />
                             <TypeIcon className={`absolute left-3 top-3.5 h-5 w-5 ${accountTypeConfig[selectedType]?.color}`} />
                           </div>
