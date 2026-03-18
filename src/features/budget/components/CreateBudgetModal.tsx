@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useCreateBudget, useUpdateBudget } from "../hooks/use-budget";
+import { useCategories } from "@/features/category/hooks/use-category";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,18 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Target, Calendar, IndianRupee, Tag, X, ChevronDown, Check } from "lucide-react";
-
-const categories = [
-  { value: "salary", label: "Salary", icon: "💼", color: "text-blue-600" },
-  { value: "investment", label: "Investment", icon: "📈", color: "text-purple-600" },
-  { value: "food", label: "Food & Dining", icon: "🍔", color: "text-orange-600" },
-  { value: "transport", label: "Transport", icon: "🚗", color: "text-yellow-600" },
-  { value: "entertainment", label: "Entertainment", icon: "🎬", color: "text-pink-600" },
-  { value: "utilities", label: "Utilities", icon: "💡", color: "text-cyan-600" },
-  { value: "shopping", label: "Shopping", icon: "🛍️", color: "text-indigo-600" },
-  { value: "health", label: "Health", icon: "🏥", color: "text-red-600" },
-  { value: "other", label: "Other", icon: "📦", color: "text-gray-600" },
-];
 
 interface BudgetFormData {
   category: string;
@@ -39,19 +28,21 @@ interface CreateBudgetModalProps {
   isEditing?: boolean;
 }
 
-export function CreateBudgetModal({ 
-  open: controlledOpen, 
-  onOpenChange, 
+export function CreateBudgetModal({
+  open: controlledOpen,
+  onOpenChange,
   initialData,
-  isEditing = false 
+  isEditing = false
 }: CreateBudgetModalProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const createBudget = useCreateBudget();
   const updateBudget = useUpdateBudget();
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
+  const categories = categoriesData?.data ?? [];
 
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  
+
   const setIsOpen = (value: boolean) => {
     if (onOpenChange) {
       onOpenChange(value);
@@ -132,7 +123,7 @@ export function CreateBudgetModal({
   const isPending = createBudget.isPending || updateBudget.isPending;
 
   // Get selected category details
-  const selectedCategory = categories.find(c => c.value === form.category);
+  const selectedCategory = categories.find((c) => c.id === form.category);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -155,14 +146,14 @@ export function CreateBudgetModal({
           >
             <X className="w-4 h-4 text-gray-500" />
           </button>
-          
+
           <DialogHeader className="p-0">
             <DialogTitle className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
               {isEditing ? 'Edit Budget' : 'Create Budget'}
             </DialogTitle>
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {isEditing 
-                ? 'Update your budget details' 
+              {isEditing
+                ? 'Update your budget details'
                 : 'Set a spending limit for a category'}
             </p>
           </DialogHeader>
@@ -175,7 +166,7 @@ export function CreateBudgetModal({
               <Tag className="w-4 h-4 text-gray-400" />
               Category
             </Label>
-            
+
             {/* Custom dropdown trigger - mobile optimized */}
             <button
               type="button"
@@ -183,12 +174,11 @@ export function CreateBudgetModal({
               className="w-full h-12 px-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors flex items-center justify-between"
             >
               {selectedCategory ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-base">{selectedCategory.icon}</span>
-                  <span className="text-gray-900 dark:text-white">{selectedCategory.label}</span>
-                </div>
+                <span className="text-gray-900 dark:text-white">{selectedCategory.name}</span>
               ) : (
-                <span className="text-gray-400">Select a category</span>
+                <span className="text-gray-400">
+                  {categoriesLoading ? "Loading..." : "Select a category"}
+                </span>
               )}
               <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${categoryDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -196,25 +186,28 @@ export function CreateBudgetModal({
             {/* Custom dropdown options - full width on mobile */}
             {categoryDropdownOpen && (
               <div className="absolute z-50 mt-1 w-[calc(100%-2rem)] sm:w-auto bg-white dark:bg-[#0F1A2F] border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl max-h-60 overflow-y-auto">
-                {categories.map((category) => (
-                  <button
-                    key={category.value}
-                    type="button"
-                    onClick={() => {
-                      handleChange("category", category.value);
-                      setCategoryDropdownOpen(false);
-                    }}
-                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors first:rounded-t-xl last:rounded-b-xl"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-base">{category.icon}</span>
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{category.label}</span>
-                    </div>
-                    {form.category === category.value && (
-                      <Check className="w-4 h-4 text-blue-600" />
-                    )}
-                  </button>
-                ))}
+                {categoriesLoading ? (
+                  <div className="px-4 py-3 text-sm text-gray-400">Loading categories...</div>
+                ) : categories.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-400">No categories found</div>
+                ) : (
+                  categories.map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => {
+                        handleChange("category", category.id);
+                        setCategoryDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                    >
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{category.name}</span>
+                      {form.category === category.id && (
+                        <Check className="w-4 h-4 text-blue-600" />
+                      )}
+                    </button>
+                  ))
+                )}
               </div>
             )}
           </div>

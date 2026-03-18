@@ -7,6 +7,8 @@ import AccountsPage from "@/features/account/pages/AccountsPage";
 import TransactionsPage from "@/features/transaction/pages/TransactionsPage";
 import NotFound from "@/pages/NotFound";
 import BudgetsPage from "@/features/budget/pages/BudgetsPage";
+import ChatPage from "@/features/chat/chatPage";
+import CategoryPage from "@/features/category/Categorypage";
 
 export function AppRouter() {
   return (
@@ -20,6 +22,8 @@ export function AppRouter() {
             <Route path="/accounts" element={<AccountsPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/budgets" element={<BudgetsPage />} />
+            <Route path="/category" element={<CategoryPage />} />
+            <Route path="/chat" element={<ChatPage />} />
           </Route>
         </Route>
 

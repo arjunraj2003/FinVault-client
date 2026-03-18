@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { number, z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,56 +9,52 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useCreateTransaction } from "../hooks/use-transactions";
 import { useAccounts } from "@/features/account/hooks/use-accounts";
+import { useCategories } from "@/features/category/hooks/use-category"; // ✅ add
 import { Plus, Loader2 } from "lucide-react";
-
-const categories = ["salary", "freelance", "investment", "food", "transport", "entertainment", "utilities", "shopping", "health", "other"] as const;
 
 const schema = z.object({
   accountId: z.string().min(1, "Select an account"),
   type: z.enum(["credit", "debit"]),
-  category: z.enum(categories),
+  categoryId: z.string().min(1, "Select a category"),
   amount: z.coerce.number().positive("Amount must be positive"),
   description: z.string().min(1, "Description is required"),
   date: z.string().min(1, "Date is required"),
 });
 
+type FormValues = z.infer<typeof schema>;
+
 export function CreateTransactionModal() {
   const [open, setOpen] = useState(false);
   const createTx = useCreateTransaction();
   const { data: accounts } = useAccounts();
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategories(); // ✅ add
+  const categories = categoriesData?.data ?? [];
 
-  const form = useForm({
+  const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       accountId: "",
-      type: "debit",   // sensible default
-      category: "food",
-      amount: "",
+      type: "debit",
+      categoryId: "",
+      amount: 0,
       description: "",
       date: new Date().toISOString().split("T")[0],
     }
   });
 
- const onSubmit = async (values: {
-  accountId: string;
-  type: "credit" | "debit";
-  category: typeof categories[number];
-  amount: string;
-  description: string;
-  date: string;
-}) => {
-  await createTx.mutateAsync({
-    accountId: values.accountId,
-    type: values.type,
-    category: values.category,
-    amount: values.amount,
-    description: values.description,
-    transactionDate: values.date, // 🔥 FIX HERE
-  });
+  const onSubmit = async (values: FormValues) => {
+    await createTx.mutateAsync({
+      accountId: values.accountId,
+      type: values.type,
+      categoryId: values.categoryId,
+      amount: values.amount.toString(),
+      description: values.description,
+      transactionDate: values.date,
+    });
 
-  form.reset();
-  setOpen(false);
-};
+    form.reset();
+    setOpen(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -81,6 +77,7 @@ export function CreateTransactionModal() {
                 <FormMessage />
               </FormItem>
             )} />
+
             <div className="grid grid-cols-2 gap-4">
               <FormField control={form.control} name="type" render={({ field }) => (
                 <FormItem>
@@ -95,19 +92,30 @@ export function CreateTransactionModal() {
                   <FormMessage />
                 </FormItem>
               )} />
-              <FormField control={form.control} name="category" render={({ field }) => (
+
+              {/* ✅ Category now from API */}
+              <FormField control={form.control} name="categoryId" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={categoriesLoading ? "Loading..." : "Select category"} />
+                      </SelectTrigger>
+                    </FormControl>
                     <SelectContent>
-                      {categories.map((c) => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.id} className="capitalize">
+                          {c.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )} />
             </div>
+
             <FormField control={form.control} name="amount" render={({ field }) => (
               <FormItem>
                 <FormLabel>Amount</FormLabel>
@@ -129,7 +137,8 @@ export function CreateTransactionModal() {
                 <FormMessage />
               </FormItem>
             )} />
-            <Button type="submit" className="w-full" disabled={createTx.isPending}>
+
+            <Button type="submit" className="w-full" disabled={createTx.isPending || categoriesLoading}>
               {createTx.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Transaction
             </Button>

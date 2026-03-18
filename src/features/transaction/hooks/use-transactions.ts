@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TransactionApi } from "../api/transaction-api";
-import type {  CreateTransactionDto } from "../types";
+import type { CreateTransactionDto } from "../types";
 import { useToast } from "@/hooks/use-toast";
 
 export function useTransactions(params?: any) {
@@ -39,12 +39,12 @@ export function useCreateTransaction() {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-      queryClient.invalidateQueries({queryKey:["budgets"]});
+      queryClient.invalidateQueries({ queryKey: ["budgets"] });
       toast({ title: "Transaction created" });
     },
-    onError: (error:any) => {
+    onError: (error: any) => {
       console.log(error)
-      toast({ title:`${error?.response?.data?.message}`, variant: "destructive" });
+      toast({ title: `${error?.response?.data?.message}`, variant: "destructive" });
     },
   });
 }

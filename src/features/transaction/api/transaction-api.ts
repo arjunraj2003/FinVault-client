@@ -6,11 +6,11 @@ export class TransactionApi {
     return axiosInstance.post<Transaction>("/transaction/create", data);
   }
 
-  static getAll(params?:any) {
+  static getAll(params?: any) {
     return axiosInstance.get<TransactionListResponse>("/transaction/getAll", { params });
   }
 
-  static deleteTrans(transactionId:string){
+  static deleteTrans(transactionId: string) {
     return axiosInstance.delete(`/transaction/delete/${transactionId}`);
   }
 }

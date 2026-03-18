@@ -1,15 +1,8 @@
+import { Category } from "../category/types";
+
 export type TransactionType = "credit" | "debit";
 
-export type TransactionCategory =
-  | "salary"
-  | "investment"
-  | "food"
-  | "transport"
-  | "entertainment"
-  | "utilities"
-  | "shopping"
-  | "health"
-  | "other";
+
 
 export interface Account {
   id: string;
@@ -22,7 +15,7 @@ export interface Transaction {
   id: string;
   type: TransactionType;
   amount: string;
-  category: TransactionCategory;
+  category: Category;
   description: string;
   createdAt: string;
   transactionDate: string;
@@ -47,11 +40,11 @@ export interface TransactionListResponse {
   };
 }
 
-export interface CreateTransactionDto{
-  type:TransactionType;
-  amount:string;
-  accountId:string;
-  category:string;
-  description:string;
-  transactionDate:string;
+export interface CreateTransactionDto {
+  type: TransactionType;
+  amount: string;
+  accountId: string;
+  categoryId: string;
+  description: string;
+  transactionDate: string;
 }

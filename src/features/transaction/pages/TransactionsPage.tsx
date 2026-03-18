@@ -7,23 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeftRight, ChevronLeft, ChevronRight, Trash2, Calendar, Tag, IndianRupee, Filter, ArrowUpDown, Receipt, Loader2, Wallet } from "lucide-react";
-import type { TransactionType, TransactionCategory } from "../types";
+import type { TransactionType } from "../types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAccounts } from "@/features/account/hooks/use-accounts";
+import { useCategories } from "@/features/category/hooks/use-category";
+import { useNavigate } from "react-router-dom";
 
-const categories: TransactionCategory[] = ["salary", "investment", "food", "transport", "entertainment", "utilities", "shopping", "health", "other"];
-
-const categoryIcons: Record<TransactionCategory, string> = {
-  salary: "💼",
-  investment: "📈",
-  food: "🍔",
-  transport: "🚗",
-  entertainment: "🎬",
-  utilities: "💡",
-  shopping: "🛍️",
-  health: "🏥",
-  other: "📦",
-};
 
 // Format currency to Indian Rupees
 const formatINR = (value: number) => {
@@ -37,15 +26,18 @@ const formatINR = (value: number) => {
 
 export default function TransactionsPage() {
   const [typeFilter, setTypeFilter] = useState<TransactionType | "all">("all");
-  const [categoryFilter, setCategoryFilter] = useState<TransactionCategory | "all">("all");
+  const [categoryFilter, setCategoryFilter] = useState<string | "all">("all");
   const [accountFilter, setAccountFilter] = useState<string | "all">("all");
   const [showFilters, setShowFilters] = useState(false);
+  const navigate = useNavigate()
 
   const { data: accounts, isLoading: accountsLoading } = useAccounts();
   const accountId = accountFilter || accounts?.[0]?.id || "";
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
 
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
+  const categories = categoriesData?.data ?? [];
   const handleDeleteClick = (transactionId: string) => {
     setTransactionToDelete(transactionId);
     setDeleteDialogOpen(true);
@@ -60,8 +52,8 @@ export default function TransactionsPage() {
   };
   const params = {
     ...(typeFilter !== "all" && { type: typeFilter }),
-    ...(categoryFilter !== "all" && { category: categoryFilter }),
-    ...(accountId !=="all" && { accountId:accountFilter })
+    ...(categoryFilter !== "all" && { categoryId: categoryFilter }),
+    ...(accountId !== "all" && { accountId: accountFilter })
   };
 
   const {
@@ -118,6 +110,16 @@ export default function TransactionsPage() {
             </Button>
 
             <CreateTransactionModal />
+
+            <Button
+              variant="outline"
+              onClick={() => navigate('/category')}
+              className="sm:hidden"
+            >
+              <Tag className="h-4 w-4 mr-2" />
+
+
+            </Button>
           </div>
         </div>
 
@@ -134,15 +136,15 @@ export default function TransactionsPage() {
             </SelectContent>
           </Select>
 
-          <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as TransactionCategory | "all")}>
+          <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as string | "all")}>
             <SelectTrigger className="w-44">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((c) => (
-                <SelectItem key={c} value={c} className="capitalize">
-                  {c}
+                <SelectItem key={c.id} value={c.name} className="capitalize">
+                  {c.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -175,31 +177,31 @@ export default function TransactionsPage() {
               </SelectContent>
             </Select>
 
-            <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as TransactionCategory | "all")}>
+            <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as string | "all")}>
               <SelectTrigger>
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((c) => (
-                  <SelectItem key={c} value={c} className="capitalize">
-                    {c}
+                  <SelectItem key={c.id} value={c.id} className="capitalize">
+                    {c.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
             <Select value={accountFilter || accountId} onValueChange={setAccountFilter}>
-            <SelectTrigger className="h-10 min-w-[160px] flex-1 bg-white dark:bg-[#0F1A2F] border-gray-200 dark:border-gray-800 rounded-xl text-sm shadow-sm hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
-              <Wallet className="w-3.5 h-3.5 mr-1.5 text-gray-500 flex-shrink-0" />
-              <SelectValue placeholder={accountsLoading ? "Loading..." : "Select account"} />
-            </SelectTrigger>
-            <SelectContent>
-              {accounts?.map((a) => (
-                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              <SelectTrigger className="h-10 min-w-[160px] flex-1 bg-white dark:bg-[#0F1A2F] border-gray-200 dark:border-gray-800 rounded-xl text-sm shadow-sm hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+                <Wallet className="w-3.5 h-3.5 mr-1.5 text-gray-500 flex-shrink-0" />
+                <SelectValue placeholder={accountsLoading ? "Loading..." : "Select account"} />
+              </SelectTrigger>
+              <SelectContent>
+                {accounts?.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
 
@@ -301,7 +303,7 @@ export default function TransactionsPage() {
                         ? 'bg-green-50 dark:bg-green-950/30'
                         : 'bg-red-50 dark:bg-red-950/30'
                         }`}>
-                        <span>{categoryIcons[tx.category as TransactionCategory] || '📦'}</span>
+                        {/* <span>{categoryIcons[tx.category as TransactionCategory] || '📦'}</span> */}
                       </div>
 
                       {/* Transaction Details */}
@@ -317,7 +319,7 @@ export default function TransactionsPage() {
                               : 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400'
                               } border-0`}
                           >
-                            {tx.category}
+                            {tx.category.name}
                           </Badge>
                         </div>
 
