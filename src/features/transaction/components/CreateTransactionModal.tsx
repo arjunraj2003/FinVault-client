@@ -59,7 +59,7 @@ export function CreateTransactionModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button><Plus className="mr-2 h-4 w-4" /> New Transaction</Button>
+        <Button><Plus className="mr-2 h-4 w-4" /></Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Create Transaction</DialogTitle></DialogHeader>
