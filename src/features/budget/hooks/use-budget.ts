@@ -1,7 +1,7 @@
   import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
   import { BudgetApi } from "../api/budget-api";
   import { useToast } from "@/hooks/use-toast";
-  import { CreateBudgetDto } from "../types";
+  import { CreateBudgetDto, UpdateBudgetDto } from "../types";
 
 
   // GET ALL BUDGETS
@@ -55,7 +55,7 @@
         data,
       }: {
         budgetId: string;
-        data: CreateBudgetDto;
+        data: UpdateBudgetDto;
       }) => {
         const res = await BudgetApi.update(budgetId, data);
         return res.data;

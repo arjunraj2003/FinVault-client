@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import { BudgetListResponse, BudgetProgressResponse, CreateBudgetDto } from "../types";
+import { BudgetListResponse, BudgetProgressResponse, CreateBudgetDto, UpdateBudgetDto } from "../types";
 
 export class BudgetApi {
 
@@ -11,7 +11,7 @@ export class BudgetApi {
     return axiosInstance.get<BudgetListResponse>("/budget");
   }
 
-  static update(budgetId: string, data: CreateBudgetDto) {
+  static update(budgetId: string, data: UpdateBudgetDto) {
     return axiosInstance.put(`/budget/${budgetId}`, data);
   }
 
