@@ -40,7 +40,7 @@ export default function DashboardPage() {
   const [selectedAccount, setSelectedAccount] = useState<string>("");
 
   const { data: accounts, isLoading: accountsLoading } = useAccounts();
-  const accountId = selectedAccount || accounts?.[0]?.id || "";
+  const accountId = selectedAccount || accounts?.[1]?.id || "";
 
   const { data: dashboardResponse, isLoading } = useDashboard(accountId, year, month);
   const summary = dashboardResponse?.data;
