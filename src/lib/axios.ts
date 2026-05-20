@@ -1,8 +1,7 @@
 import axios from "axios";
 
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;;
-// const BASE_URL = "http://localhost:3000/api/v1"
+const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:4000/api/v1";
 
 
 let accessToken: string | null = null;
@@ -72,7 +71,10 @@ axiosInstance.interceptors.response.use(
           {},
           { withCredentials: true }
         );
-        const newToken = data.accessToken;
+        const newToken = data.data?.accessToken;
+        if (!newToken) {
+          throw new Error("Refresh response did not include an access token.");
+        }
         setAccessToken(newToken);
         processQueue(null, newToken);
         originalRequest.headers.Authorization = `Bearer ${newToken}`;

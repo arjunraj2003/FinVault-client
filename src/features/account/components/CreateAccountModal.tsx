@@ -19,6 +19,8 @@ const accountSchema = z.object({
   balance: z.number().min(0, "Balance cannot be negative").optional(),
 });
 
+type AccountFormValues = z.infer<typeof accountSchema>;
+
 type AccountTypeConfig = {
   icon: typeof Wallet;
   label: string;
@@ -109,7 +111,7 @@ export function CreateAccountModal({
     }
   };
 
-  const form = useForm({
+  const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
     defaultValues: {
       name: "",
@@ -123,9 +125,12 @@ export function CreateAccountModal({
   const selectedCurrency = form.watch("currency");
   const TypeIcon = accountTypeConfig[selectedType]?.icon || Wallet;
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: AccountFormValues) => {
     try {
-      await createAccount.mutateAsync(values);
+      await createAccount.mutateAsync({
+        ...values,
+        balance: String(values.balance ?? 0),
+      });
       form.reset();
       setStep(1);
       setIsOpen(false);

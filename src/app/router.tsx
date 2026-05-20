@@ -12,6 +12,7 @@ const TransactionsPage = lazy(() => import("@/features/transaction/pages/Transac
 const BudgetsPage = lazy(() => import("@/features/budget/pages/BudgetsPage"));
 const CategoryPage = lazy(() => import("@/features/category/Categorypage"));
 const ChatPage = lazy(() => import("@/features/chat/chatPage"));
+const ImportTransactionPage = lazy(() => import("@/features/transaction/pages/ImportTransactionPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 export function AppRouter() {
@@ -29,6 +30,7 @@ export function AppRouter() {
               <Route path="/budgets" element={<BudgetsPage />} />
               <Route path="/category" element={<CategoryPage />} />
               <Route path="/chat" element={<ChatPage />} />
+              <Route path="/import-transaction" element={<ImportTransactionPage />} />
             </Route>
           </Route>
 

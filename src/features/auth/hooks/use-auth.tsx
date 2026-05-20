@@ -1,8 +1,10 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
+import type { AxiosError } from "axios";
 import { setAccessToken, getAccessToken } from "@/lib/axios";
 import { AuthApi } from "../api/auth-api";
 import type { AuthContextType, LoginDto, User } from "../types";
 import { useToast } from "@/hooks/use-toast";
+import type { ApiErrorResponse } from "@/lib/api-error";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -85,10 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
     } catch (error) {
+      const apiError = error as AxiosError<ApiErrorResponse>;
+      const message =
+        apiError.response?.data?.message ||
+        (apiError.request ? "Could not reach the API server. Check that the backend is running on port 3000." : "Login failed.");
       console.error("Login error:", error);
       toast({ 
         title: "Login failed", 
-        description: "Please check your credentials.", 
+        description: message,
         variant: "destructive" 
       });
       throw error;

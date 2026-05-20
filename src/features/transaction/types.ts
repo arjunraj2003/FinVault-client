@@ -48,3 +48,14 @@ export interface CreateTransactionDto {
   description: string;
   transactionDate: string;
 }
+
+export interface TransactionQueryParams {
+  page?: number;
+  limit?: number;
+  type?: TransactionType;
+  categoryId?: string;
+  accountId?: string;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+}

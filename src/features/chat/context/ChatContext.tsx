@@ -1,8 +1,10 @@
 // features/chat/context/ChatContext.tsx
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import type { AxiosError } from "axios";
 import { ChatApi } from "../api/chat-api";
 import type { ChatMessage, ResultCard, ResultRow } from "../types";
 import { useToast } from "@/hooks/use-toast";
+import type { ApiErrorResponse } from "@/lib/api-error";
 
 const SKIP_KEYS = ["id", "userid", "accountid", "sql"];
 
@@ -75,9 +77,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
-      } catch (error: any) {
+      } catch (error) {
+        const apiError = error as AxiosError<ApiErrorResponse>;
         toast({
-          title: error?.response?.data?.message || "Failed to send message",
+          title: apiError.response?.data?.message || "Failed to send message",
           variant: "destructive",
         });
         setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));

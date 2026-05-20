@@ -15,6 +15,7 @@ import {
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
 import { CreateBudgetModal } from "../components/CreateBudgetModal";
+import type { Budget } from "../types";
 
 const formatINR = (value: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -46,7 +47,7 @@ export default function BudgetsPage() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [budgetToDelete, setBudgetToDelete] = useState<string | null>(null);
-  const [editingBudget, setEditingBudget] = useState<any>(null);
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
   const handleDeleteClick = (id: string) => {
@@ -54,7 +55,7 @@ export default function BudgetsPage() {
     setDeleteDialogOpen(true);
   };
 
-  const handleEditClick = (budget: any) => {
+  const handleEditClick = (budget: Budget) => {
     setEditingBudget(budget);
     setEditModalOpen(true);
   };
@@ -130,7 +131,7 @@ export default function BudgetsPage() {
 
         {/* Budget Cards */}
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {budgets.map((budget: any) => (
+          {budgets.map((budget) => (
             <BudgetCard
               key={budget.id}
               budget={budget}
@@ -198,7 +199,13 @@ export default function BudgetsPage() {
   );
 }
 
-function BudgetCard({ budget, onDelete, onEdit }: any) {
+interface BudgetCardProps {
+  budget: Budget;
+  onDelete: (id: string) => void;
+  onEdit: (budget: Budget) => void;
+}
+
+function BudgetCard({ budget, onDelete, onEdit }: BudgetCardProps) {
   const { data, isLoading } = useBudgetProgress(budget.id);
 
   const progress = data?.data?.progressPercentage ?? 0;

@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Target, Calendar, IndianRupee, Tag, X, ChevronDown, Check } from "lucide-react";
+import type { Budget } from "../types";
 
 interface BudgetFormData {
   categoryId: string;
@@ -24,7 +25,7 @@ interface BudgetFormData {
 interface CreateBudgetModalProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  initialData?: any;
+  initialData?: Budget | null;
   isEditing?: boolean;
 }
 

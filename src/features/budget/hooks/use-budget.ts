@@ -1,7 +1,9 @@
   import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+  import type { AxiosError } from "axios";
   import { BudgetApi } from "../api/budget-api";
   import { useToast } from "@/hooks/use-toast";
   import { CreateBudgetDto, UpdateBudgetDto } from "../types";
+  import type { ApiErrorResponse } from "@/lib/api-error";
 
 
   // GET ALL BUDGETS
@@ -34,7 +36,7 @@
         toast({ title: "Budget created successfully" });
       },
 
-      onError: (error: any) => {
+      onError: (error: AxiosError<ApiErrorResponse>) => {
         toast({
           title: error?.response?.data?.message || "Budget creation failed",
           variant: "destructive",
@@ -68,7 +70,7 @@
         toast({ title: "Budget updated" });
       },
 
-      onError: (error: any) => {
+      onError: (error: AxiosError<ApiErrorResponse>) => {
         toast({
           title: error?.response?.data?.message || "Update failed",
           variant: "destructive",

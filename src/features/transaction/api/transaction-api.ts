@@ -1,12 +1,12 @@
 import axiosInstance from "@/lib/axios";
-import type { CreateTransactionDto, Transaction, TransactionListResponse } from "../types";
+import type { CreateTransactionDto, Transaction, TransactionListResponse, TransactionQueryParams } from "../types";
 
 export class TransactionApi {
   static create(data: CreateTransactionDto) {
     return axiosInstance.post<Transaction>("/transaction/create", data);
   }
 
-  static getAll(params?: any) {
+  static getAll(params?: TransactionQueryParams) {
     return axiosInstance.get<TransactionListResponse>("/transaction/getAll", { params });
   }
 

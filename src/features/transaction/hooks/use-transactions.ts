@@ -1,10 +1,12 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import { TransactionApi } from "../api/transaction-api";
-import type { CreateTransactionDto } from "../types";
+import type { CreateTransactionDto, TransactionListResponse, TransactionQueryParams } from "../types";
 import { useToast } from "@/hooks/use-toast";
+import type { ApiErrorResponse } from "@/lib/api-error";
 
-export function useTransactions(params?: any) {
+export function useTransactions(params?: TransactionQueryParams) {
   return useInfiniteQuery({
     queryKey: ["transactions", params],
     queryFn: async ({ pageParam = 1 }) => {
@@ -42,9 +44,9 @@ export function useCreateTransaction() {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
       toast({ title: "Transaction created" });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<ApiErrorResponse>) => {
       console.log(error)
-      toast({ title: `${error?.response?.data?.message}`, variant: "destructive" });
+      toast({ title: error.response?.data?.message || "Failed to create transaction", variant: "destructive" });
     },
   });
 }
@@ -61,17 +63,17 @@ export function useDeleteTransaction() {
     onSuccess: (_, transactionId) => {
       queryClient.setQueriesData(
         { queryKey: ["transactions"] },
-        (oldData: any) => {
+        (oldData: InfiniteData<TransactionListResponse> | undefined) => {
           if (!oldData) return oldData;
 
           return {
             ...oldData,
-            pages: oldData.pages.map((page: any) => ({
+            pages: oldData.pages.map((page) => ({
               ...page,
               data: {
                 ...page.data,
                 data: page.data.data.filter(
-                  (tx: any) => tx.id !== transactionId
+                  (tx) => tx.id !== transactionId
                 ),
               },
             })),

@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import { CategoryApi } from "../api/category-api";
 import { useToast } from "@/hooks/use-toast";
 import type { CreateCategoryDto, UpdateCategoryDto } from "../types";
+import type { ApiErrorResponse } from "@/lib/api-error";
 
 // ─── GET ALL CATEGORIES ────────────────────────────────────────────────────
 
@@ -45,7 +47,7 @@ export function useCreateCategory() {
       toast({ title: "Category created successfully" });
     },
 
-    onError: (error: any) => {
+    onError: (error: AxiosError<ApiErrorResponse>) => {
       toast({
         title: error?.response?.data?.message || "Failed to create category",
         variant: "destructive",
@@ -78,7 +80,7 @@ export function useUpdateCategory() {
       toast({ title: "Category updated successfully" });
     },
 
-    onError: (error: any) => {
+    onError: (error: AxiosError<ApiErrorResponse>) => {
       toast({
         title: error?.response?.data?.message || "Failed to update category",
         variant: "destructive",
@@ -103,7 +105,7 @@ export function useDeactivateCategory() {
       toast({ title: "Category deactivated" });
     },
 
-    onError: (error: any) => {
+    onError: (error: AxiosError<ApiErrorResponse>) => {
       toast({
         title: error?.response?.data?.message || "Failed to deactivate category",
         variant: "destructive",
