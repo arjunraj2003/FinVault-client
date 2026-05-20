@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, ReceiptText, Wand2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2, Loader2, ReceiptText, Wand2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,8 @@ import { useCategories } from "@/features/category/hooks/use-category";
 import { useCreateTransaction } from "../hooks/use-transactions";
 import { parseTransactionMessage } from "../utils/message-parser";
 import type { TransactionType } from "../types";
+
+type ParseStatus = "idle" | "parsed" | "stale";
 
 function getSharedText(search: string) {
   const params = new URLSearchParams(search);
@@ -38,8 +40,11 @@ export default function ImportTransactionPage() {
   const [categoryId, setCategoryId] = useState("");
   const [description, setDescription] = useState("");
   const [transactionDate, setTransactionDate] = useState(new Date().toISOString().split("T")[0]);
+  const [parseStatus, setParseStatus] = useState<ParseStatus>("idle");
 
-  const canParse = message.trim() && accounts.length > 0 && categories.length > 0;
+  const canParse = Boolean(message.trim() && accounts.length > 0 && categories.length > 0);
+  const selectedAccount = accounts.find((account) => account.id === accountId);
+  const selectedCategory = categories.find((category) => category.id === categoryId);
 
   const applyParse = () => {
     if (!canParse) return;
@@ -50,6 +55,7 @@ export default function ImportTransactionPage() {
     setCategoryId(parsed.categoryId);
     setDescription(parsed.description);
     setTransactionDate(parsed.transactionDate);
+    setParseStatus("parsed");
   };
 
   useEffect(() => {
@@ -94,14 +100,66 @@ export default function ImportTransactionPage() {
         <CardContent className="space-y-4">
           <Textarea
             value={message}
-            onChange={(event) => setMessage(event.target.value)}
+            onChange={(event) => {
+              setMessage(event.target.value);
+              setParseStatus(event.target.value.trim() ? "stale" : "idle");
+            }}
             placeholder="Paste a bank SMS or UPI message here"
             className="min-h-32"
           />
-          <Button type="button" variant="secondary" onClick={applyParse} disabled={!canParse || isLoading}>
-            <Wand2 className="h-4 w-4" />
-            Parse Message
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              type="button"
+              variant={parseStatus === "parsed" ? "default" : "secondary"}
+              onClick={applyParse}
+              disabled={!canParse || isLoading}
+              className="w-full transition-all active:scale-[0.98] sm:w-auto"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : parseStatus === "parsed" ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : (
+                <Wand2 className="h-4 w-4" />
+              )}
+              {parseStatus === "parsed" ? "Parsed" : parseStatus === "stale" ? "Parse Again" : "Parse Message"}
+            </Button>
+
+            {parseStatus === "parsed" && (
+              <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700 dark:border-green-900 dark:bg-green-950/30 dark:text-green-300">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>Details filled below. Review before creating.</span>
+              </div>
+            )}
+
+            {parseStatus === "stale" && (
+              <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>Message changed. Parse again to refresh fields.</span>
+              </div>
+            )}
+          </div>
+
+          {parseStatus === "parsed" && (
+            <div className="grid gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-800 dark:bg-gray-900/40 sm:grid-cols-2">
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Amount</span>
+                <p className="font-medium text-gray-900 dark:text-white">{amount || "Not detected"}</p>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Type</span>
+                <p className="font-medium capitalize text-gray-900 dark:text-white">{type}</p>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Account</span>
+                <p className="font-medium text-gray-900 dark:text-white">{selectedAccount?.name || "Select account"}</p>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Category</span>
+                <p className="font-medium capitalize text-gray-900 dark:text-white">{selectedCategory?.name || "Select category"}</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeftRight, ChevronLeft, ChevronRight, Trash2, Calendar, Tag, IndianRupee, Filter, ArrowUpDown, Receipt, Loader2, Wallet } from "lucide-react";
+import { ArrowLeftRight, Trash2, Calendar, Tag, Filter, ArrowUpDown, Receipt, Loader2, Wallet, ReceiptText } from "lucide-react";
 import type { TransactionType } from "../types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAccounts } from "@/features/account/hooks/use-accounts";
@@ -98,7 +98,7 @@ export default function TransactionsPage() {
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {/* Filter Toggle Button - Mobile */}
             <Button
               variant="outline"
@@ -107,6 +107,15 @@ export default function TransactionsPage() {
             >
               <Filter className="h-4 w-4 mr-2" />
               Filters
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => navigate("/import-transaction")}
+              className="min-w-0"
+            >
+              <ReceiptText className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Import Message</span>
             </Button>
 
             <CreateTransactionModal />
@@ -245,7 +254,13 @@ export default function TransactionsPage() {
               </div>
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">No transactions yet</h2>
               <p className="text-gray-500 dark:text-gray-400 mb-8">Create your first transaction to start tracking</p>
-              <CreateTransactionModal />
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Button variant="outline" onClick={() => navigate("/import-transaction")}>
+                  <ReceiptText className="h-4 w-4 mr-2" />
+                  Import Message
+                </Button>
+                <CreateTransactionModal />
+              </div>
             </CardContent>
           </Card>
         )}
