@@ -47,6 +47,7 @@ export interface CreateTransactionDto {
   categoryId: string;
   description: string;
   transactionDate: string;
+  sourceAccountId?: string;
 }
 
 export interface TransactionQueryParams {

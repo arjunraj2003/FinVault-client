@@ -2,15 +2,16 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useCreateAccount } from "../hooks/use-accounts";
-import { Plus, Loader2, Wallet, Landmark, CreditCard, TrendingUp, PiggyBank, X, IndianRupee } from "lucide-react";
+import { ArrowLeft, Loader2, Wallet, Landmark, CreditCard, TrendingUp, PiggyBank, IndianRupee } from "lucide-react";
 import type { AccountType } from "../types";
 import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
 
 const accountSchema = z.object({
   name: z.string().min(1, "Account name is required").max(50, "Account name too long"),
@@ -45,33 +46,33 @@ const accountTypeConfig: Record<AccountType, AccountTypeConfig> = {
   checking: {
     icon: Landmark,
     label: "Checking",
-    color: "text-blue-600",
-    gradient: "from-blue-500 to-blue-600",
-    lightColor: "bg-blue-50 dark:bg-blue-950/30",
+    color: "text-primary",
+    gradient: "from-primary/80 to-primary",
+    lightColor: "bg-primary/10 border-primary/20",
     description: "Everyday spending and transactions",
   },
   savings: {
     icon: PiggyBank,
     label: "Savings",
-    color: "text-green-600",
-    gradient: "from-green-500 to-green-600",
-    lightColor: "bg-green-50 dark:bg-green-950/30",
+    color: "text-green-500",
+    gradient: "from-green-500/80 to-green-500",
+    lightColor: "bg-green-500/10 border-green-500/20",
     description: "Save and grow your money",
   },
   credit: {
     icon: CreditCard,
     label: "Credit",
-    color: "text-red-600",
-    gradient: "from-red-500 to-red-600",
-    lightColor: "bg-red-50 dark:bg-red-950/30",
+    color: "text-destructive",
+    gradient: "from-destructive/80 to-destructive",
+    lightColor: "bg-destructive/10 border-destructive/20",
     description: "Credit cards and loans",
   },
   investment: {
     icon: TrendingUp,
     label: "Investment",
-    color: "text-purple-600",
-    gradient: "from-purple-500 to-purple-600",
-    lightColor: "bg-purple-50 dark:bg-purple-950/30",
+    color: "text-purple-500",
+    gradient: "from-purple-500/80 to-purple-500",
+    lightColor: "bg-purple-500/10 border-purple-500/20",
     description: "Stocks, bonds, and ETFs",
   },
 };
@@ -89,38 +90,10 @@ const currencies = [
   { code: "CHF", symbol: "Fr", name: "Swiss Franc", flag: "🇨🇭" },
 ];
 
-interface CreateAccountModalProps {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  trigger?: React.ReactNode;
-}
-
-export function CreateAccountModal({
-  open: controlledOpen,
-  onOpenChange,
-  trigger
-}: CreateAccountModalProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
+export default function CreateAccountPage() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const createAccount = useCreateAccount();
-
-  // Use controlled open if provided, otherwise use internal state
-  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
-
-  const setIsOpen = (value: boolean) => {
-    if (onOpenChange) {
-      onOpenChange(value);
-    } else {
-      setInternalOpen(value);
-    }
-    if (!value) {
-      // Reset form when closing
-      setTimeout(() => {
-        setStep(1);
-        form.reset();
-      }, 200);
-    }
-  };
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
@@ -147,17 +120,10 @@ export function CreateAccountModal({
         statementDay: values.statementDay,
         dueDay: values.dueDay
       });
-      form.reset();
-      setStep(1);
-      setIsOpen(false);
+      navigate("/accounts");
     } catch (error) {
-      // Error handling is managed by react-query
       console.error("Failed to create account:", error);
     }
-  };
-
-  const handleClose = () => {
-    setIsOpen(false);
   };
 
   const nextStep = async () => {
@@ -168,39 +134,40 @@ export function CreateAccountModal({
   const prevStep = () => setStep(1);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-white dark:bg-[#0F1A2F] border-gray-200 dark:border-gray-800">
-        {/* Header with close button */}
-        <div className="relative px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-800">
+    <div className="bg-background text-foreground p-4 sm:p-6 lg:p-8">
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* Header with Back Button */}
+        <div className="flex items-center gap-4 mb-2">
           <button
-            onClick={handleClose}
-            className="absolute right-6 top-6 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            onClick={() => navigate("/accounts")}
+            className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center hover:bg-accent transition-colors shrink-0"
+            title="Go Back"
           >
-            <X className="w-4 h-4 text-gray-500" />
+            <ArrowLeft className="w-5 h-5 text-foreground" />
           </button>
 
-          <DialogHeader className="p-0">
-            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
               {step === 1 ? "Create New Account" : "Set Up Your Account"}
-            </DialogTitle>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
               {step === 1
                 ? "Choose the type of account you want to create"
                 : "Add some details to get started"}
             </p>
-          </DialogHeader>
-
-          {/* Progress Steps */}
-          <div className="flex items-center gap-2 mt-4">
-            <div className={`h-1 flex-1 rounded-full transition-colors ${step >= 1 ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-800'}`} />
-            <div className={`h-1 flex-1 rounded-full transition-colors ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-800'}`} />
           </div>
         </div>
 
+        {/* Progress Steps */}
+        <div className="flex items-center gap-2">
+          <div className={`h-1 flex-1 rounded-full transition-colors ${step >= 1 ? 'bg-primary' : 'bg-muted'}`} />
+          <div className={`h-1 flex-1 rounded-full transition-colors ${step >= 2 ? 'bg-primary' : 'bg-muted'}`} />
+        </div>
+
+        <Card className="w-full border-border bg-card shadow-lg overflow-hidden">
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="px-6 pb-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="px-6 py-6">
             <AnimatePresence mode="wait">
               {step === 1 ? (
                 <motion.div
@@ -208,7 +175,7 @@ export function CreateAccountModal({
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="space-y-4"
+                  className="space-y-6"
                 >
                   {/* Account Type Selection */}
                   <FormField
@@ -216,7 +183,7 @@ export function CreateAccountModal({
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <FormLabel className="text-sm font-medium text-foreground">
                           Account Type
                         </FormLabel>
                         <div className="grid grid-cols-2 gap-3 mt-2">
@@ -229,18 +196,18 @@ export function CreateAccountModal({
                                 key={type}
                                 type="button"
                                 onClick={() => field.onChange(type)}
-                                className={`relative p-4 rounded-xl border-2 transition-all duration-200 ${isSelected
-                                    ? `border-${type === 'checking' ? 'blue' : type === 'savings' ? 'green' : type === 'credit' ? 'red' : 'purple'}-600 bg-${type === 'checking' ? 'blue' : type === 'savings' ? 'green' : type === 'credit' ? 'red' : 'purple'}-50 dark:bg-${type === 'checking' ? 'blue' : type === 'savings' ? 'green' : type === 'credit' ? 'red' : 'purple'}-950/20`
-                                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
+                                className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-left ${isSelected
+                                    ? `border-primary bg-primary/10`
+                                    : 'border-border bg-muted/30 hover:border-muted-foreground'
                                   }`}
                               >
                                 <div className={`w-10 h-10 rounded-full ${config.lightColor} flex items-center justify-center mb-2`}>
                                   <Icon className={`h-5 w-5 ${config.color}`} />
                                 </div>
-                                <p className={`text-sm font-medium ${isSelected ? config.color : 'text-gray-900 dark:text-white'}`}>
+                                <p className={`text-sm font-bold ${isSelected ? 'text-primary' : 'text-foreground'}`}>
                                   {config.label}
                                 </p>
-                                <p className="text-xs text-gray-500 mt-1 text-left">
+                                <p className="text-xs text-muted-foreground mt-1 leading-snug">
                                   {config.description}
                                 </p>
                               </button>
@@ -258,14 +225,14 @@ export function CreateAccountModal({
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <FormLabel className="text-sm font-medium text-foreground">
                           Account Name
                         </FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Input
                               placeholder="e.g., Primary Savings"
-                              className="pl-10 h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:border-blue-500 focus:ring-blue-500"
+                              className="pl-10 h-12 bg-muted border-border rounded-xl focus:border-primary focus:ring-primary text-foreground placeholder:text-muted-foreground"
                               {...field}
                             />
                             <TypeIcon className={`absolute left-3 top-3.5 h-5 w-5 ${accountTypeConfig[selectedType]?.color}`} />
@@ -277,19 +244,19 @@ export function CreateAccountModal({
                   />
 
                   {/* Navigation Buttons */}
-                  <div className="flex gap-3 pt-4">
+                  <div className="flex gap-3 pt-2">
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={handleClose}
-                      className="flex-1 h-12 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900"
+                      onClick={() => navigate("/accounts")}
+                      className="flex-1 h-12 border-border bg-card hover:bg-accent text-foreground rounded-xl"
                     >
                       Cancel
                     </Button>
                     <Button
                       type="button"
                       onClick={nextStep}
-                      className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                      className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium"
                     >
                       Continue
                     </Button>
@@ -301,17 +268,17 @@ export function CreateAccountModal({
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-4"
+                  className="space-y-6"
                 >
                   {/* Selected Account Summary */}
-                  <div className={`p-4 rounded-xl ${accountTypeConfig[selectedType]?.lightColor} mb-4`}>
+                  <div className={`p-4 rounded-xl border ${accountTypeConfig[selectedType]?.lightColor}`}>
                     <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-full ${accountTypeConfig[selectedType]?.lightColor} flex items-center justify-center`}>
+                      <div className={`w-12 h-12 rounded-full bg-card border border-border flex items-center justify-center`}>
                         <TypeIcon className={`h-6 w-6 ${accountTypeConfig[selectedType]?.color}`} />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Creating</p>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="text-xs text-muted-foreground">Creating</p>
+                        <p className="font-bold text-foreground">
                           {form.getValues("name") || "New Account"} • {accountTypeConfig[selectedType]?.label}
                         </p>
                       </div>
@@ -324,31 +291,31 @@ export function CreateAccountModal({
                     name="currency"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <FormLabel className="text-sm font-medium text-foreground">
                           Currency
                         </FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+                            <SelectTrigger className="h-12 bg-muted border-border rounded-xl text-foreground">
                               <SelectValue>
                                 {field.value && (
                                   <div className="flex items-center gap-2">
                                     <span>{currencies.find(c => c.code === field.value)?.flag}</span>
                                     <span>{field.value} - {currencies.find(c => c.code === field.value)?.name}</span>
-                                    <span className="text-gray-400 ml-auto">{currencies.find(c => c.code === field.value)?.symbol}</span>
+                                    <span className="text-muted-foreground ml-auto">{currencies.find(c => c.code === field.value)?.symbol}</span>
                                   </div>
                                 )}
                               </SelectValue>
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="max-h-80">
+                          <SelectContent className="max-h-80 bg-card border-border">
                             {currencies.map((currency) => (
-                              <SelectItem key={currency.code} value={currency.code}>
+                              <SelectItem key={currency.code} value={currency.code} className="text-foreground">
                                 <div className="flex items-center gap-2">
                                   <span>{currency.flag}</span>
                                   <span className="font-medium">{currency.code}</span>
-                                  <span className="text-gray-500 text-sm">- {currency.name}</span>
-                                  <span className="text-gray-400 ml-auto">{currency.symbol}</span>
+                                  <span className="text-muted-foreground text-sm">- {currency.name}</span>
+                                  <span className="text-muted-foreground ml-auto">{currency.symbol}</span>
                                 </div>
                               </SelectItem>
                             ))}
@@ -365,12 +332,12 @@ export function CreateAccountModal({
                     name="balance"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Initial Balance (Optional)
+                        <FormLabel className="text-sm font-medium text-foreground">
+                          {selectedType === 'credit' ? 'Current Balance / Debt (Optional)' : 'Initial Balance (Optional)'}
                         </FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <span className="absolute left-3 top-3.5 text-gray-500">
+                            <span className="absolute left-3 top-3.5 text-muted-foreground">
                               {currencies.find(c => c.code === selectedCurrency)?.symbol || '₹'}
                             </span>
                             <Input
@@ -378,14 +345,14 @@ export function CreateAccountModal({
                               step="0.01"
                               min="0"
                               placeholder="0.00"
-                              className="pl-8 h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:border-blue-500 focus:ring-blue-500"
+                              className="pl-8 h-12 bg-muted border-border rounded-xl focus:border-primary focus:ring-primary text-foreground placeholder:text-muted-foreground"
                               {...field}
                               onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
                               value={field.value || ''}
                             />
                           </div>
                         </FormControl>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Starting balance for this account
                         </p>
                         <FormMessage />
@@ -400,16 +367,19 @@ export function CreateAccountModal({
                         name="creditLimit"
                         render={({ field }) => (
                           <FormItem className="col-span-full">
-                            <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">Credit Limit</FormLabel>
+                            <FormLabel className="text-sm font-medium text-foreground">Credit Limit</FormLabel>
                             <FormControl>
-                              <Input
-                                type="number"
-                                placeholder="0.00"
-                                className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800"
-                                {...field}
-                                onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
-                                value={field.value || ''}
-                              />
+                              <div className="relative">
+                                <span className="absolute left-3 top-3.5 text-muted-foreground">₹</span>
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  className="pl-8 h-12 bg-muted border-border rounded-xl focus:border-primary focus:ring-primary text-foreground"
+                                  {...field}
+                                  onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
+                                  value={field.value || ''}
+                                />
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -420,13 +390,13 @@ export function CreateAccountModal({
                         name="statementDay"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">Statement Day</FormLabel>
+                            <FormLabel className="text-sm font-medium text-foreground">Statement Day</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
                                 min="1" max="31"
                                 placeholder="e.g. 5"
-                                className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800"
+                                className="h-12 bg-muted border-border rounded-xl focus:border-primary focus:ring-primary text-foreground"
                                 {...field}
                                 onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                                 value={field.value || ''}
@@ -441,13 +411,13 @@ export function CreateAccountModal({
                         name="dueDay"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">Due Day</FormLabel>
+                            <FormLabel className="text-sm font-medium text-foreground">Due Day</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
                                 min="1" max="31"
                                 placeholder="e.g. 25"
-                                className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800"
+                                className="h-12 bg-muted border-border rounded-xl focus:border-primary focus:ring-primary text-foreground"
                                 {...field}
                                 onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                                 value={field.value || ''}
@@ -461,23 +431,23 @@ export function CreateAccountModal({
                   )}
 
                   {/* Navigation Buttons */}
-                  <div className="flex gap-3 pt-4">
+                  <div className="flex gap-3 pt-2">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={prevStep}
-                      className="flex-1 h-12 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900"
+                      className="flex-1 h-12 border-border bg-card hover:bg-accent text-foreground rounded-xl"
                     >
                       Back
                     </Button>
                     <Button
                       type="submit"
                       disabled={createAccount.isPending}
-                      className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                      className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold"
                     >
                       {createAccount.isPending ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary-foreground" />
                           Creating...
                         </>
                       ) : (
@@ -492,12 +462,13 @@ export function CreateAccountModal({
         </Form>
 
         {/* Security Note */}
-        <div className="px-6 pb-6">
-          <p className="text-xs text-center text-gray-400">
+        <div className="px-6 pb-6 text-center">
+          <p className="text-xs text-muted-foreground">
             🔒 Your account information is encrypted and secure
           </p>
         </div>
-      </DialogContent>
-    </Dialog>
+      </Card>
+      </div>
+    </div>
   );
 }
