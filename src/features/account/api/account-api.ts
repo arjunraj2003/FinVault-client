@@ -13,4 +13,8 @@ export class AccountApi {
   static getBalance(accountId: string) {
     return axiosInstance.get<BalanceResponse>(`/account/getBalance/${accountId}`);
   }
+
+  static getCreditCardSummary(accountId: string) {
+    return axiosInstance.get(`/account/${accountId}/credit-card-summary`);
+  }
 }

@@ -42,3 +42,14 @@ export function useCreateAccount() {
     },
   });
 }
+
+export function useCreditCardSummary(accountId: string) {
+  return useQuery({
+    queryKey: ["creditCardSummary", accountId],
+    queryFn: async () => {
+      const { data } = await AccountApi.getCreditCardSummary(accountId);
+      return data.data; // assuming ApiResponse wraps the data
+    },
+    enabled: !!accountId,
+  });
+}

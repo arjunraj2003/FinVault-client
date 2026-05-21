@@ -1,4 +1,4 @@
-import { useAccounts } from "../hooks/use-accounts";
+import { useAccounts, useCreditCardSummary } from "../hooks/use-accounts";
 import { CreateAccountModal } from "../components/CreateAccountModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,13 +55,41 @@ const formatINR = (value: number) => {
   }).format(value);
 };
 
+function CreditCardDetailsView({ accountId, hideBalances }: { accountId: string, hideBalances: boolean }) {
+  const { data, isLoading } = useCreditCardSummary(accountId);
+  if (isLoading || !data) return <Skeleton className="h-10 w-full mt-2" />;
+  
+  const utilization = (data.currentBalance / data.creditLimit) * 100;
+
+  return (
+    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+      <div className="flex justify-between text-xs mb-1">
+        <span className="text-gray-500 font-medium">Unbilled: {hideBalances ? '₹•••' : formatINR(data.unbilledAmount)}</span>
+        <span className="text-gray-500">Debt: {hideBalances ? '₹•••' : formatINR(data.currentBalance)}</span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 overflow-hidden my-2">
+        <div className={`h-1.5 rounded-full ${utilization > 80 ? 'bg-red-500' : utilization > 50 ? 'bg-yellow-500' : 'bg-green-500'}`} style={{ width: `${Math.min(utilization, 100)}%` }}></div>
+      </div>
+      <div className="flex justify-between text-[11px] mt-2 text-gray-400">
+        <span>Bill on: {data.statementDay}th</span>
+        <span>Due on: {data.dueDay}th</span>
+      </div>
+    </div>
+  );
+}
+
 export default function AccountsPage() {
   const { data: accounts, isLoading, isError } = useAccounts();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hideBalances, setHideBalances] = useState(false);
 
-  // Calculate total balance for all accounts
-  const totalBalance = accounts?.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0) || 0;
+  // Calculate total balance for all accounts (ignoring credit accounts)
+  const totalBalance = accounts?.reduce((sum, acc) => {
+    if (acc.type === 'credit') {
+      return sum;
+    }
+    return sum + (Number(acc.balance) || 0);
+  }, 0) || 0;
 
   // Show loading skeletons
   if (isLoading) {
@@ -249,7 +277,7 @@ export default function AccountsPage() {
 
                 <CardContent>
                   <div className="mb-3">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Current Balance</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{account.type === 'credit' ? 'Available Credit' : 'Current Balance'}</p>
                     <div className="text-2xl font-bold text-gray-900 dark:text-white">
                       {hideBalances ? '₹••••••' : formatINR(balance)}
                     </div>
@@ -265,6 +293,10 @@ export default function AccountsPage() {
                       <MoreHorizontal className="w-4 h-4 text-gray-400" />
                     </button>
                   </div>
+                  
+                  {account.type === 'credit' && (
+                    <CreditCardDetailsView accountId={account.id} hideBalances={hideBalances} />
+                  )}
 
                   {/* Hover Overlay Effect */}
                   <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />

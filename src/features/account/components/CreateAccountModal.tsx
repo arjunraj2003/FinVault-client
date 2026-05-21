@@ -17,6 +17,17 @@ const accountSchema = z.object({
   type: z.enum(["checking", "savings", "credit", "investment"] as const),
   currency: z.string().min(1, "Currency is required"),
   balance: z.number().min(0, "Balance cannot be negative").optional(),
+  creditLimit: z.number().min(0).optional(),
+  statementDay: z.number().min(1).max(31).optional(),
+  dueDay: z.number().min(1).max(31).optional(),
+}).refine(data => {
+  if (data.type === 'credit') {
+    return !!data.creditLimit && !!data.statementDay && !!data.dueDay;
+  }
+  return true;
+}, {
+  message: "Credit limit, statement day, and due day are required",
+  path: ["creditLimit"],
 });
 
 type AccountFormValues = z.infer<typeof accountSchema>;
@@ -128,8 +139,13 @@ export function CreateAccountModal({
   const onSubmit = async (values: AccountFormValues) => {
     try {
       await createAccount.mutateAsync({
-        ...values,
+        name: values.name,
+        type: values.type,
+        currency: values.currency,
         balance: String(values.balance ?? 0),
+        creditLimit: values.creditLimit,
+        statementDay: values.statementDay,
+        dueDay: values.dueDay
       });
       form.reset();
       setStep(1);
@@ -376,6 +392,73 @@ export function CreateAccountModal({
                       </FormItem>
                     )}
                   />
+
+                  {selectedType === 'credit' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="creditLimit"
+                        render={({ field }) => (
+                          <FormItem className="col-span-full">
+                            <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">Credit Limit</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="0.00"
+                                className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
+                                value={field.value || ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="statementDay"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">Statement Day</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="1" max="31"
+                                placeholder="e.g. 5"
+                                className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                                value={field.value || ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="dueDay"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">Due Day</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="1" max="31"
+                                placeholder="e.g. 25"
+                                className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                                value={field.value || ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
 
                   {/* Navigation Buttons */}
                   <div className="flex gap-3 pt-4">
