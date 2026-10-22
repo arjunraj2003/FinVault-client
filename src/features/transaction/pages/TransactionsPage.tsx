@@ -127,9 +127,10 @@ export default function TransactionsPage() {
             <Button
               variant="outline"
               onClick={() => navigate('/category')}
-              className="sm:hidden border-border bg-card hover:bg-accent text-foreground"
+              className="border-border bg-card hover:bg-accent text-foreground"
             >
-              <Tag className="h-4 w-4 mr-2" />
+              <Tag className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Categories</span>
             </Button>
           </div>
         </div>

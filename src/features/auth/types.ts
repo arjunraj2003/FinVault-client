@@ -3,6 +3,12 @@ export interface LoginDto {
   password: string;
 }
 
+export interface RegisterDto {
+  name: string;
+  email: string;
+  password: string;
+}
+
 export interface AuthResponse {
   data:{
     accessToken: string;
@@ -22,5 +28,6 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (data: LoginDto) => Promise<void>;
+  register: (data: RegisterDto) => Promise<void>;
   logout: () => Promise<void>;
 }

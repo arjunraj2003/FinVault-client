@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/use-auth";
 import { LoginForm } from "../components/LoginForm";
@@ -6,6 +7,7 @@ import { Shield, TrendingUp, Wallet } from "lucide-react";
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [mode, setMode] = useState<"login" | "register">("login");
 
   if (!isLoading && isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -95,15 +97,16 @@ export default function LoginPage() {
               {/* Header */}
               <div className="text-center mb-8">
                 <h1 className="text-2xl font-semibold text-foreground mb-1">
-                  Welcome back
+                  {mode === "login" ? "Welcome back" : "Create your account"}
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Enter your credentials to access your account
+                  {mode === "login"
+                    ? "Enter your credentials to access your account"
+                    : "Your accounts, transactions, and budgets stay private to you"}
                 </p>
               </div>
 
-              {/* Login Form - Original component preserved */}
-              <LoginForm />
+              <LoginForm key={mode} mode={mode} onModeChange={setMode} />
 
               {/* Divider */}
               <div className="relative my-6">

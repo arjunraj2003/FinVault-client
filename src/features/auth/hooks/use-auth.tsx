@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, type React
 import type { AxiosError } from "axios";
 import { setAccessToken, getAccessToken } from "@/lib/axios";
 import { AuthApi } from "../api/auth-api";
-import type { AuthContextType, LoginDto, User } from "../types";
+import type { AuthContextType, LoginDto, RegisterDto, User } from "../types";
 import { useToast } from "@/hooks/use-toast";
 import type { ApiErrorResponse } from "@/lib/api-error";
 
@@ -101,6 +101,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
+  const register = useCallback(async (data: RegisterDto) => {
+    try {
+      const response = await AuthApi.register(data);
+      const { accessToken, user: userData } = response.data.data;
+      setAccessToken(accessToken);
+      setUser(userData);
+      toast({
+        title: "Account created",
+        description: `Signed in as ${userData.email}`,
+      });
+    } catch (error) {
+      const apiError = error as AxiosError<ApiErrorResponse>;
+      const message =
+        apiError.response?.data?.message ||
+        (apiError.request ? "Could not reach the API server. Check that the backend is running on port 3000." : "Registration failed.");
+      toast({
+        title: "Could not create account",
+        description: message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  }, [toast]);
+
   const logout = useCallback(async () => {
     try {
       await AuthApi.logout();
@@ -133,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: !!user,
     isLoading,
     login,
+    register,
     logout,
   };
 
