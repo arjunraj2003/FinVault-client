@@ -1,7 +1,8 @@
 // layouts/DashboardLayout.tsx
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { LayoutDashboard, Wallet, ArrowLeftRight, LogOut, TargetIcon, Bot } from "lucide-react";
+import { LayoutDashboard, Wallet, ArrowLeftRight, LogOut, TargetIcon, Bot, Fingerprint } from "lucide-react";
+import { hasStoredPasskey } from "@/features/auth/passkey";
 import { useState, useEffect, Suspense } from "react";
 import { ChatProvider } from "@/features/chat/context/ChatContext";
 
@@ -33,14 +34,25 @@ const navItems = [
 ];
 
 function Layout() {
-  const { user, logout } = useAuth();
+  const { user, logout, disableFingerprint } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [passkeyOn, setPasskeyOn] = useState(() => hasStoredPasskey());
 
   const handleLogout = async () => {
     await logout();
     navigate("/login", { replace: true });
+  };
+
+  const handleDisableFingerprint = async () => {
+    try {
+      await disableFingerprint();
+      setPasskeyOn(false);
+      setShowProfileMenu(false);
+    } catch {
+      // toast is shown by useAuth
+    }
   };
 
   const isChatPage = location.pathname === "/chat";
@@ -81,7 +93,10 @@ function Layout() {
             <div className="relative">
               <button
                 id="profile-button"
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                onClick={() => {
+                  setPasskeyOn(hasStoredPasskey());
+                  setShowProfileMenu(!showProfileMenu);
+                }}
                 className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center border-2 border-border shadow-md hover:shadow-lg transition-shadow"
               >
                 <span className="text-sm font-semibold text-foreground">
@@ -98,6 +113,15 @@ function Layout() {
                     <p className="text-sm font-semibold text-foreground">{user?.name || "User"}</p>
                     <p className="text-xs text-muted-foreground mt-1">{user?.email || ""}</p>
                   </div>
+                  {passkeyOn && (
+                    <button
+                      onClick={handleDisableFingerprint}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent transition-colors"
+                    >
+                      <Fingerprint className="h-4 w-4" />
+                      <span>Turn off fingerprint</span>
+                    </button>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm text-destructive hover:bg-destructive/10 transition-colors"

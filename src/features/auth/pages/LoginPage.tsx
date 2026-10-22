@@ -1,13 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/use-auth";
 import { LoginForm } from "../components/LoginForm";
 import loginBg from "@/assets/login-bg.jpg";
-import { Shield, TrendingUp, Wallet } from "lucide-react";
+import { Fingerprint, Loader2, Shield, TrendingUp, Wallet } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { hasStoredPasskey, platformAuthenticatorAvailable } from "../passkey";
 
 export default function LoginPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, unlockWithFingerprint } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
+  const [canUnlock, setCanUnlock] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    platformAuthenticatorAvailable().then((available) => {
+      if (active) setCanUnlock(available && hasStoredPasskey());
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const unlock = async () => {
+    setUnlocking(true);
+    try {
+      await unlockWithFingerprint();
+    } catch {
+      setCanUnlock(hasStoredPasskey());
+    } finally {
+      setUnlocking(false);
+    }
+  };
 
   if (!isLoading && isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -101,10 +126,29 @@ export default function LoginPage() {
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   {mode === "login"
-                    ? "Enter your credentials to access your account"
+                    ? canUnlock
+                      ? "Use your fingerprint, or your email and password"
+                      : "Enter your credentials to access your account"
                     : "Your accounts, transactions, and budgets stay private to you"}
                 </p>
               </div>
+
+              {mode === "login" && canUnlock && (
+                <div className="mb-6 space-y-4">
+                  <Button type="button" className="w-full" onClick={unlock} disabled={unlocking}>
+                    {unlocking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Fingerprint className="mr-2 h-4 w-4" />}
+                    Unlock with fingerprint
+                  </Button>
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-border"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                      <span className="px-2 bg-card text-muted-foreground">or use your password</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <LoginForm key={mode} mode={mode} onModeChange={setMode} />
 

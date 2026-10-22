@@ -29,5 +29,8 @@ export interface AuthContextType {
   isLoading: boolean;
   login: (data: LoginDto) => Promise<void>;
   register: (data: RegisterDto) => Promise<void>;
+  unlockWithFingerprint: () => Promise<void>;
+  enrollFingerprint: () => Promise<void>;
+  disableFingerprint: () => Promise<void>;
   logout: () => Promise<void>;
 }
