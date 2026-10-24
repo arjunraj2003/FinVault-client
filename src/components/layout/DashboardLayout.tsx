@@ -1,8 +1,10 @@
 // layouts/DashboardLayout.tsx
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { LayoutDashboard, Wallet, ArrowLeftRight, LogOut, TargetIcon, Bot, Fingerprint } from "lucide-react";
+import { LayoutDashboard, Wallet, ArrowLeftRight, LogOut, TargetIcon, Bot, Fingerprint, Bell, BellOff } from "lucide-react";
 import { hasStoredPasskey } from "@/features/auth/passkey";
+import { useToast } from "@/hooks/use-toast";
+import { currentPushSubscription, disableBudgetNotifications, enableBudgetNotifications, notificationsSupported } from "@/features/notifications/push";
 import { useState, useEffect, Suspense } from "react";
 import { ChatProvider } from "@/features/chat/context/ChatContext";
 
@@ -35,10 +37,14 @@ const navItems = [
 
 function Layout() {
   const { user, logout, disableFingerprint } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [passkeyOn, setPasskeyOn] = useState(() => hasStoredPasskey());
+  const [canNotify, setCanNotify] = useState(() => notificationsSupported());
+  const [notificationsOn, setNotificationsOn] = useState(false);
+  const [updatingNotifications, setUpdatingNotifications] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -52,6 +58,47 @@ function Layout() {
       setShowProfileMenu(false);
     } catch {
       // toast is shown by useAuth
+    }
+  };
+
+  const refreshNotifications = async () => {
+    if (!notificationsSupported()) {
+      setCanNotify(false);
+      return;
+    }
+    setCanNotify(true);
+    const subscription = await currentPushSubscription();
+    setNotificationsOn(Boolean(subscription));
+  };
+
+  const handleToggleNotifications = async () => {
+    setUpdatingNotifications(true);
+    try {
+      if (notificationsOn) {
+        await disableBudgetNotifications();
+        setNotificationsOn(false);
+        toast({
+          title: "Budget alerts are off",
+          description: "This phone will not be told when a budget fills up.",
+        });
+      } else {
+        await enableBudgetNotifications();
+        setNotificationsOn(true);
+        toast({
+          title: "Budget alerts are on",
+          description: "You will be notified when a budget reaches 80% or is full.",
+        });
+      }
+      setShowProfileMenu(false);
+    } catch (error) {
+      const responseMessage = (error as { response?: { data?: { message?: string } } }).response?.data?.message;
+      toast({
+        title: "Could not change budget alerts",
+        description: responseMessage || (error instanceof Error ? error.message : "Try again."),
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingNotifications(false);
     }
   };
 
@@ -95,6 +142,7 @@ function Layout() {
                 id="profile-button"
                 onClick={() => {
                   setPasskeyOn(hasStoredPasskey());
+                  void refreshNotifications();
                   setShowProfileMenu(!showProfileMenu);
                 }}
                 className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center border-2 border-border shadow-md hover:shadow-lg transition-shadow"
@@ -113,6 +161,16 @@ function Layout() {
                     <p className="text-sm font-semibold text-foreground">{user?.name || "User"}</p>
                     <p className="text-xs text-muted-foreground mt-1">{user?.email || ""}</p>
                   </div>
+                  {canNotify && (
+                    <button
+                      onClick={handleToggleNotifications}
+                      disabled={updatingNotifications}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent transition-colors disabled:opacity-60"
+                    >
+                      {notificationsOn ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+                      <span>{notificationsOn ? "Turn off notifications" : "Turn on notifications"}</span>
+                    </button>
+                  )}
                   {passkeyOn && (
                     <button
                       onClick={handleDisableFingerprint}
